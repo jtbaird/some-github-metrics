@@ -69,7 +69,7 @@ def export_code_frequency(directory, organization, authToken):
             for repo in orgs.get_repos():
                 if repo.fork == False and repo.private == False:
                     totalrepos +=1
-    with open(directory + "/github_code_frequency_" + organization + "_" + today+ ".csv", 'w', encoding='utf-8') as csvfile:
+    with open(directory + "/github_code_frequency_" + organization + "_" + today+ ".csv", 'w') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(
             ["count", "org", "repo", "week", "additions", "deletions", "commits", "author", "is a member"])
@@ -114,43 +114,9 @@ def export_code_frequency(directory, organization, authToken):
             else:
                 next
 
-def export_community_engagement(directory, organization, authToken):
-    g = Github(authToken)
-    today = str(datetime.date.today())
-    today = today.replace("-", "")
-    totalrepos = 0
-    allorgs = g.get_user().get_orgs()
-    for orgs in allorgs:
-        if orgs.login == organization:
-            for repo in orgs.get_repos():
-                if repo.fork == False and repo.private == False:
-                    totalrepos += 1
-    with open(directory + "/github_community_engagement_" + organization + "_" + today+ ".csv", 'w', encoding='utf-8') as csvfile:
-        csvwriter = csv.writer(csvfile, delimiter=',')
-        csvwriter.writerow(
-            ["date", "org", "repo", "forks", "stars", "commits", "collaborators"])
-        for orgs in allorgs:
-            if orgs.login == organization:
-                print("Gathering community metrics for", orgs.name)
-                count = 0
-                for repo in orgs.get_repos():
-                    countcommit = 0
-                    countcollab = 0
-                    if repo.fork == False and repo.private == False:
-                        count += 1
-                        for commits in repo.get_commits():
-                            countcommit += 1
-                        for collab in repo.get_contributors():
-                            countcollab += 1
-                        print("[", str(count).zfill(2), "|", totalrepos, "]", repo.name, "|", countcommit, "commits |", repo.forks_count, "forks |",
-                              repo.stargazers_count, "stars |", countcollab, "contributors")
-                        csvwriter.writerow(
-                            [todaystr, organization, repo.name, repo.forks_count, repo.stargazers_count, countcommit,
-                             countcollab])
-
 def list_unique_collaborators(directory, organization, authToken):
     g = Github(authToken)
-    with open(directory + "/github_unique_collaborators_" + organization + ".csv", "w", encoding="utf-8") as csvfile:
+    with open(directory + "/github_unique_collaborators_" + organization + ".csv", "w") as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(["name", "login", "name", "member of the org?"])
         loginmembers, namesmembers = list_org_members(organization, authToken)
@@ -197,8 +163,6 @@ def main():
         list_org_members(organization, authToken)
         print("")
         export_code_frequency(directory, organization, authToken)
-        print("")
-        export_community_engagement(directory, organization, authToken)
     except Exception as e:
         print(e)
 
